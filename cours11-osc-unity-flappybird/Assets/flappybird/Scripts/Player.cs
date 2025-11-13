@@ -10,6 +10,9 @@ public class Player : MonoBehaviour
 {
     return Mathf.Clamp(((value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin), outputMin, outputMax);
 }
+
+private int etatEnMemoire = 1; // Le code initalise l'état initial du bouton comme relâché
+
 //important
 void TraiterOscBUTTON(OSCMessage message)
 {
@@ -27,9 +30,20 @@ void TraiterOscBUTTON(OSCMessage message)
     }
 
     // Récupérer la valeur de l’Key unit / button depuis le message OSC
-    int value = message.Values[0].IntValue;   
-}
+    int value = message.Values[0].IntValue; 
 
+    int nouveauEtat = value; // REMPLACER ici les ... par le code qui permet de récuérer la nouvelle donnée du flux
+    if (etatEnMemoire != nouveauEtat) { // Le code compare le nouvel etat avec l'etat en mémoire
+    etatEnMemoire = nouveauEtat; // Le code met à jour l'état mémorisé
+    if ( nouveauEtat == 0  ) {
+        // METTRE ici le code pour lorsque le bouton est appuyé
+         direction = Vector3.up * strength;
+    } else {
+        // METTRE ici le code pour lorsque le bouton est relaché
+    }
+}
+  
+}
 
 
     public Sprite[] sprites;
