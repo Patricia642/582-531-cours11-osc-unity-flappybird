@@ -1,4 +1,4 @@
-#N canvas 283 167 995 661 12;
+#N canvas 1013 118 995 661 12;
 #X obj 154 196 comport;
 #X msg 214 136 devices;
 #X obj 153 345 pdchoco/slip_parse;

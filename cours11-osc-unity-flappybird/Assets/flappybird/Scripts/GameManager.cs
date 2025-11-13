@@ -5,45 +5,46 @@ using extOSC;//important
 [DefaultExecutionOrder(-1)]
 public class GameManager : MonoBehaviour
 {
+    public extOSC.OSCTransmitter oscTransmitter; //important
     public extOSC.OSCReceiver oscReceiver; //important
 
     private int etatEnMemoire = 1; // Le code initalise l'état initial du bouton comme relâché
      public static float Proportion(float value, float inputMin, float inputMax, float outputMin, float outputMax)
-{
-    return Mathf.Clamp(((value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin), outputMin, outputMax);
-}
-
-//important
-void TraiterOscBUTTON(OSCMessage message)
-{
-// Si le message n'a pas d'argument ou l'argument n'est pas un Int on l'ignore
-    if (message.Values.Count == 0)
     {
-        Debug.Log("No value in OSC message");
-        return;
+        return Mathf.Clamp(((value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin), outputMin, outputMax);
     }
-        
-    if (message.Values[0].Type != OSCValueType.Int)
+
+    //important
+    void TraiterOscBUTTON(OSCMessage message)
     {
-        Debug.Log("Value in message is not an Int");
-        return;
+    // Si le message n'a pas d'argument ou l'argument n'est pas un Int on l'ignore
+        if (message.Values.Count == 0)
+        {
+            Debug.Log("No value in OSC message");
+            return;
+        }
+            
+        if (message.Values[0].Type != OSCValueType.Int)
+        {
+            Debug.Log("Value in message is not an Int");
+            return;
+        }
+
+        // Récupérer la valeur de l’Key unit / button depuis le message OSC
+        int value = message.Values[0].IntValue; 
+
+        int nouveauEtat = value; // REMPLACER ici les ... par le code qui permet de récuérer la nouvelle donnée du flux
+        if (etatEnMemoire != nouveauEtat) { // Le code compare le nouvel etat avec l'etat en mémoire
+            etatEnMemoire = nouveauEtat; // Le code met à jour l'état mémorisé
+            if ( nouveauEtat == 0 && !isPlaying ) {
+                // METTRE ici le code pour lorsque le bouton est appuyé
+                Play();
+            } else {
+                // METTRE ici le code pour lorsque le bouton est relaché
+            }
+        }
+
     }
-
-    // Récupérer la valeur de l’Key unit / button depuis le message OSC
-    int value = message.Values[0].IntValue; 
-
-    int nouveauEtat = value; // REMPLACER ici les ... par le code qui permet de récuérer la nouvelle donnée du flux
-    if (etatEnMemoire != nouveauEtat) { // Le code compare le nouvel etat avec l'etat en mémoire
-    etatEnMemoire = nouveauEtat; // Le code met à jour l'état mémorisé
-    if ( nouveauEtat == 0 && !isPlaying ) {
-        // METTRE ici le code pour lorsque le bouton est appuyé
-         Play();
-    } else {
-        // METTRE ici le code pour lorsque le bouton est relaché
-    }
-}
-
-}
 
 
 
@@ -122,7 +123,21 @@ void TraiterOscBUTTON(OSCMessage message)
             Destroy(pipes[i].gameObject);
         }
 
+
+
         isPlaying = true;
+
+        var oSCMessage = new OSCMessage("/pixel");  // CHANGER l'adresse /pixel pour l'adresse désirée
+
+        // AJOUTER autant d'arguments que désiré
+        // Dans cet exemple, trois arguments de type entiers (int) sont ajoutés au message
+        oSCMessage.AddValue( OSCValue.Int(0) ); // Ajoute l'entier 255
+        oSCMessage.AddValue( OSCValue.Int(255) ); // Ajoute un autre 255
+        oSCMessage.AddValue( OSCValue.Int(0) ); // Ajoute un troisième 255
+
+        // Envoyer le message 
+        oscTransmitter.Send(oSCMessage); 
+
     }
 
     public void GameOver()
@@ -131,6 +146,19 @@ void TraiterOscBUTTON(OSCMessage message)
         gameOver.SetActive(true);
 
         Stop();
+
+
+        var oSCMessage = new OSCMessage("/pixel");  // CHANGER l'adresse /pixel pour l'adresse désirée
+
+        // AJOUTER autant d'arguments que désiré
+        // Dans cet exemple, trois arguments de type entiers (int) sont ajoutés au message
+        oSCMessage.AddValue( OSCValue.Int(255) ); // Ajoute l'entier 255
+        oSCMessage.AddValue( OSCValue.Int(0) ); // Ajoute un autre 255
+        oSCMessage.AddValue( OSCValue.Int(0) ); // Ajoute un troisième 255
+
+        // Envoyer le message 
+        oscTransmitter.Send(oSCMessage); 
+
     }
 
     public void IncreaseScore()
