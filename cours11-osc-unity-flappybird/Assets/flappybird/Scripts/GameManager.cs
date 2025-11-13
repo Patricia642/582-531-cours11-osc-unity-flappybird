@@ -1,9 +1,54 @@
 using UnityEngine;
 using UnityEngine.UI;
+using extOSC;//important
 
 [DefaultExecutionOrder(-1)]
 public class GameManager : MonoBehaviour
 {
+    public extOSC.OSCReceiver oscReceiver; //important
+
+    private int etatEnMemoire = 1; // Le code initalise l'état initial du bouton comme relâché
+     public static float Proportion(float value, float inputMin, float inputMax, float outputMin, float outputMax)
+{
+    return Mathf.Clamp(((value - inputMin) / (inputMax - inputMin) * (outputMax - outputMin) + outputMin), outputMin, outputMax);
+}
+
+//important
+void TraiterOscBUTTON(OSCMessage message)
+{
+// Si le message n'a pas d'argument ou l'argument n'est pas un Int on l'ignore
+    if (message.Values.Count == 0)
+    {
+        Debug.Log("No value in OSC message");
+        return;
+    }
+        
+    if (message.Values[0].Type != OSCValueType.Int)
+    {
+        Debug.Log("Value in message is not an Int");
+        return;
+    }
+
+    // Récupérer la valeur de l’Key unit / button depuis le message OSC
+    int value = message.Values[0].IntValue; 
+
+    int nouveauEtat = value; // REMPLACER ici les ... par le code qui permet de récuérer la nouvelle donnée du flux
+    if (etatEnMemoire != nouveauEtat) { // Le code compare le nouvel etat avec l'etat en mémoire
+    etatEnMemoire = nouveauEtat; // Le code met à jour l'état mémorisé
+    if ( nouveauEtat == 0 && !isPlaying ) {
+        // METTRE ici le code pour lorsque le bouton est appuyé
+         Play();
+    } else {
+        // METTRE ici le code pour lorsque le bouton est relaché
+    }
+}
+
+}
+
+
+
+
+
     public static GameManager Instance { get; private set; }
 
     [SerializeField] private Player player;
@@ -40,6 +85,7 @@ public class GameManager : MonoBehaviour
     private void Start()
     {
         Stop();
+         oscReceiver.Bind("/BUTTON", TraiterOscBUTTON); //important
     }
 
     public void Stop()
